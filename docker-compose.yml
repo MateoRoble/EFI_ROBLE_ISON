@@ -1,13 +1,14 @@
-version: "3.8"
+#version de docker-compose
+version: '3'
 services:
   flask_app: 
-    build:   
+    build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "5005:5005" 
     volumes:
-      - .:/efi_flask
+      - .:/PIT_STOP-BLOG
     env_file:
       - .env
     depends_on:
@@ -17,18 +18,18 @@ services:
   mysql_db:
     image: mysql:5.7  # Use the official MySQL 5.7 image from Docker Hub
     env_file:
-        - .env
+      - .env
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}  # Create a database named 'mydatabase'
-      MYSQL_USER: ${MYSQL_USER}  # Create a MySQL user 'myuser'
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}  # Set the password for 'myuser'
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # Set the root password for MySQL
-    ports:
-      - "3308:3306"  # Map host port 3307 to container port 3306 for MySQL
+ports:
+      - "3307:3306"  # Map host port 3306 to container port 3306 for MySQL
+    command: --init-file /docker-entrypoint-initdb.d/create_schema.sql
+    restart: always  # Restarts the MySQL container if it stops or crashes
+    container_name: ${MYSQL_CONTAINER_NAME}
     volumes:
-      - db_data:/var/lib/mysql
-    restart: always
-    container_name: mysqldatabase
+      - ./.data/db:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d/
+
 
 volumes:
   db_data:
